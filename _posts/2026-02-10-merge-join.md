@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "An Ode to Merge Join, My Go-To for Syncing Large Data"
+title: "An Ode to Merge Join"
 date: 2026-02-10
 ---
 
@@ -51,6 +51,298 @@ def merge_join(left, right, left_key, right_key):
 ```
 
 It takes any two sorted iterables and key functions. The output encodes the operation through presence and absence: `(left, None)` is an insert - the row exists in the source but not the destination. `(None, right)` is a delete. `(left, right)` is a potential update - both rows are right there for field-by-field comparison. A full outer join on unique keys in a single pass.
+
+Here's the algorithm stepping through a small example — syncing an 8-row CSV against a 7-row database table:
+
+<style>
+#merge-join-viz {
+  margin: 1.5em 0;
+  padding: 1em;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+#merge-join-viz .mjv-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+#merge-join-viz button {
+  padding: 6px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+#merge-join-viz button:hover:not(:disabled) { background: #f0f0f0; }
+#merge-join-viz button:disabled { opacity: 0.4; cursor: default; }
+#merge-join-viz .mjv-counter { margin-left: auto; font-size: 13px; color: #888; }
+#merge-join-viz .mjv-tables { display: flex; gap: 24px; }
+#merge-join-viz .mjv-panel { flex: 1; min-width: 0; overflow-x: auto; }
+#merge-join-viz .mjv-label { font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #555; }
+#merge-join-viz table { width: 100%; border-collapse: collapse; font-size: 14px; }
+#merge-join-viz th,
+#merge-join-viz td { padding: 5px 8px; text-align: left; border: none; border-bottom: 1px solid #f0f0f0; }
+#merge-join-viz th {
+  border-bottom: 2px solid #e0e0e0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+#merge-join-viz .mjv-ptr { width: 20px; padding: 5px 4px; position: relative; }
+#merge-join-viz tr.mjv-current .mjv-ptr::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid #6366f1;
+}
+#merge-join-viz tr.mjv-match { background: #dcfce7; }
+#merge-join-viz tr.mjv-delete { background: #fee2e2; }
+#merge-join-viz tr.mjv-insert { background: #dcfce7; }
+#merge-join-viz tr.mjv-update { background: #fef3c7; }
+#merge-join-viz tr.mjv-current { box-shadow: inset 3px 0 0 #6366f1; }
+#merge-join-viz .mjv-status {
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+#merge-join-viz .mjv-result {
+  padding: 4px 10px;
+  margin: 3px 0;
+  border-radius: 3px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000;
+}
+#merge-join-viz .mjv-result-match { background: #fff; }
+#merge-join-viz .mjv-result-delete { background: #fee2e2; }
+#merge-join-viz .mjv-result-insert { background: #dcfce7; }
+#merge-join-viz .mjv-result-update { background: #fef3c7; }
+@media (prefers-color-scheme: dark) {
+  #merge-join-viz { border-color: #444; }
+  #merge-join-viz button { background: #2d2d2d; border-color: #555; color: #ddd; }
+  #merge-join-viz button:hover:not(:disabled) { background: #3d3d3d; }
+  #merge-join-viz .mjv-label { color: #bbb; }
+  #merge-join-viz th { border-bottom-color: #555; color: #888; }
+  #merge-join-viz td { border-bottom-color: #333; }
+  #merge-join-viz tr.mjv-match { background: rgba(34,197,94,.15); }
+  #merge-join-viz tr.mjv-delete { background: rgba(239,68,68,.15); }
+  #merge-join-viz tr.mjv-insert { background: rgba(34,197,94,.15); }
+  #merge-join-viz tr.mjv-update { background: rgba(245,158,11,.15); }
+  #merge-join-viz tr.mjv-current { box-shadow: inset 3px 0 0 #818cf8; }
+  #merge-join-viz tr.mjv-current .mjv-ptr::after { border-left-color: #818cf8; }
+  #merge-join-viz .mjv-status { background: #2d2d2d; color: #ddd; }
+  #merge-join-viz .mjv-result-match { background: #fff; }
+  #merge-join-viz .mjv-result-delete { background: rgba(239,68,68,.15); }
+  #merge-join-viz .mjv-result-insert { background: rgba(34,197,94,.15); }
+  #merge-join-viz .mjv-result-update { background: rgba(245,158,11,.15); }
+  #merge-join-viz .mjv-counter { color: #777; }
+}
+@media (max-width: 500px) {
+  #merge-join-viz .mjv-tables { flex-direction: column; gap: 12px; }
+}
+</style>
+
+<div id="merge-join-viz"></div>
+
+<script>
+(function() {
+  var csv = [
+    [1, 'Alice', '100.00'],
+    [2, 'Bob', '200.00'],
+    [4, 'Diana', '400.00'],
+    [5, 'Eve', '550.00'],
+    [6, 'Frank', '600.00'],
+    [7, 'Grace', '700.00'],
+    [9, 'Ivan', '900.00'],
+    [10, 'Judy', '1000.00']
+  ];
+  var db = [
+    [1, 'Alice', '100.00'],
+    [2, 'Bob', '250.00'],
+    [3, 'Charlie', '300.00'],
+    [5, 'Eve', '500.00'],
+    [7, 'Grace', '700.00'],
+    [8, 'Heidi', '800.00'],
+    [10, 'Judy', '1000.00']
+  ];
+  var steps = [
+    { c: 0, d: 0, type: 'match',
+      text: 'CSV key (1) = DB key (1). Keys match \u2014 fields identical.',
+      result: 'Match: id=1, Alice \u2014 no changes',
+      cc: [], dc: [] },
+    { c: 1, d: 1, type: 'update',
+      text: 'CSV key (2) = DB key (2). Keys match \u2014 amount differs (250 \u2192 200).',
+      result: 'Update: id=2, Bob (amount: 250 \u2192 200)',
+      cc: [[1, 'update']], dc: [] },
+    { c: 2, d: 2, type: 'delete',
+      text: 'CSV key (4) > DB key (3). id=3 exists only in database \u2014 delete.',
+      result: 'Delete: id=3, Charlie',
+      cc: [], dc: [[2, 'delete']] },
+    { c: 2, d: 3, type: 'insert',
+      text: 'CSV key (4) < DB key (5). id=4 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=4, Diana',
+      cc: [[2, 'insert']], dc: [] },
+    { c: 3, d: 3, type: 'update',
+      text: 'CSV key (5) = DB key (5). Keys match \u2014 amount differs (500 \u2192 550).',
+      result: 'Update: id=5, Eve (amount: 500 \u2192 550)',
+      cc: [[3, 'update']], dc: [] },
+    { c: 4, d: 4, type: 'insert',
+      text: 'CSV key (6) < DB key (7). id=6 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=6, Frank',
+      cc: [[4, 'insert']], dc: [] },
+    { c: 5, d: 4, type: 'match',
+      text: 'CSV key (7) = DB key (7). Keys match \u2014 fields identical.',
+      result: 'Match: id=7, Grace \u2014 no changes',
+      cc: [], dc: [] },
+    { c: 6, d: 5, type: 'delete',
+      text: 'CSV key (9) > DB key (8). id=8 exists only in database \u2014 delete.',
+      result: 'Delete: id=8, Heidi',
+      cc: [], dc: [[5, 'delete']] },
+    { c: 6, d: 6, type: 'insert',
+      text: 'CSV key (9) < DB key (10). id=9 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=9, Ivan',
+      cc: [[6, 'insert']], dc: [] },
+    { c: 7, d: 6, type: 'match',
+      text: 'CSV key (10) = DB key (10). Keys match \u2014 fields identical.',
+      result: 'Match: id=10, Judy \u2014 no changes',
+      cc: [], dc: [] },
+    { c: -1, d: -1, type: 'done',
+      text: 'Both inputs exhausted. Sync complete: 3 inserts, 2 updates, 2 deletes.',
+      result: null, cc: [], dc: [] }
+  ];
+
+  var cur = -1, timer = null;
+  var el = document.getElementById('merge-join-viz');
+
+  function tbl(data, id) {
+    var h = '<table id="' + id + '"><thead><tr>' +
+      '<th class="mjv-ptr"></th><th>id</th><th>name</th><th>amount</th>' +
+      '</tr></thead><tbody>';
+    for (var i = 0; i < data.length; i++) {
+      h += '<tr id="' + id + i + '"><td class="mjv-ptr"></td>' +
+        '<td>' + data[i][0] + '</td><td>' + data[i][1] + '</td>' +
+        '<td>' + data[i][2] + '</td></tr>';
+    }
+    return h + '</tbody></table>';
+  }
+
+  el.innerHTML =
+    '<div class="mjv-controls">' +
+      '<button id="mjv-step">Step</button>' +
+      '<button id="mjv-play">Play</button>' +
+      '<button id="mjv-reset">Reset</button>' +
+      '<span class="mjv-counter" id="mjv-ctr"></span>' +
+    '</div>' +
+    '<div class="mjv-tables">' +
+      '<div class="mjv-panel"><div class="mjv-label">CSV (Source)</div>' +
+        tbl(csv, 'c') + '</div>' +
+      '<div class="mjv-panel"><div class="mjv-label">Database</div>' +
+        tbl(db, 'd') + '</div>' +
+    '</div>' +
+    '<div class="mjv-status" id="mjv-st" aria-live="polite"></div>' +
+    '<div class="mjv-output" id="mjv-out"></div>';
+
+  var stepBtn = document.getElementById('mjv-step');
+  var playBtn = document.getElementById('mjv-play');
+  document.getElementById('mjv-reset').addEventListener('click', doReset);
+  stepBtn.addEventListener('click', doStep);
+  playBtn.addEventListener('click', togglePlay);
+
+  function render() {
+    var i, tr, s;
+    for (i = 0; i < csv.length; i++) {
+      document.getElementById('c' + i).className = '';
+    }
+    for (i = 0; i < db.length; i++) {
+      document.getElementById('d' + i).className = '';
+    }
+    for (s = 0; s <= cur && s < steps.length; s++) {
+      for (i = 0; i < steps[s].cc.length; i++)
+        document.getElementById('c' + steps[s].cc[i][0]).classList.add('mjv-' + steps[s].cc[i][1]);
+      for (i = 0; i < steps[s].dc.length; i++)
+        document.getElementById('d' + steps[s].dc[i][0]).classList.add('mjv-' + steps[s].dc[i][1]);
+    }
+    if (cur >= 0 && cur < steps.length && steps[cur].c >= 0) {
+      document.getElementById('c' + steps[cur].c).classList.add('mjv-current');
+    }
+    if (cur >= 0 && cur < steps.length && steps[cur].d >= 0) {
+      document.getElementById('d' + steps[cur].d).classList.add('mjv-current');
+    }
+    if (cur === -1) {
+      document.getElementById('c0').classList.add('mjv-current');
+      document.getElementById('d0').classList.add('mjv-current');
+    }
+    document.getElementById('mjv-st').innerHTML =
+      cur === -1
+        ? 'Press <b>Step</b> to walk through the merge join.'
+        : steps[cur].text;
+    var out = '';
+    for (s = 0; s <= cur && s < steps.length; s++) {
+      if (steps[s].result) {
+        out += '<div class="mjv-result mjv-result-' + steps[s].type + '">' +
+          steps[s].result + '</div>';
+      }
+    }
+    document.getElementById('mjv-out').innerHTML = out;
+    document.getElementById('mjv-ctr').textContent =
+      cur === -1 ? '' : 'Step ' + (cur + 1) + ' of ' + steps.length;
+    stepBtn.disabled = cur >= steps.length - 1;
+    if (cur >= steps.length - 1 && timer) {
+      clearInterval(timer);
+      timer = null;
+      playBtn.textContent = 'Play';
+    }
+  }
+
+  function doStep() {
+    if (cur < steps.length - 1) { cur++; render(); }
+  }
+
+  function togglePlay() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+      playBtn.textContent = 'Play';
+    } else {
+      if (cur >= steps.length - 1) cur = -1;
+      playBtn.textContent = 'Pause';
+      doStep();
+      timer = setInterval(function() {
+        if (cur >= steps.length - 1) {
+          clearInterval(timer);
+          timer = null;
+          playBtn.textContent = 'Play';
+        } else { doStep(); }
+      }, 1200);
+    }
+  }
+
+  function doReset() {
+    if (timer) { clearInterval(timer); timer = null; playBtn.textContent = 'Play'; }
+    cur = -1;
+    render();
+  }
+
+  render();
+})();
+</script>
 
 Ondrej Kokes [blogged about a Python implementation](https://kokes.github.io/blog/2018/11/25/merging-streams-python.html) that cleverly uses `heapq.merge()` and `itertools.groupby()`, but it is slightly slower in my tests and didn't save that many lines over the hand-written version above.
 
