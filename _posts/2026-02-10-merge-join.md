@@ -12,8 +12,6 @@ My early attempts would read the source data into a hash table and then compare 
 
 A merge join does the same comparison in 19 MB. Constant regardless of dataset size. In 25 lines of Python.
 
-Any time both sides of a comparison are sorted by the same key, you can walk them in lockstep and produce a complete diff in a single pass. Data often has a natural order; just add an index on the destination to match it. No hash table, no temp table. An in-application merge join will do the trick.
-
 ## The algorithm
 
 Two sorted inputs, two pointers. Advance whichever pointer has the smaller key. When the keys match, you have a pair. When they don't, you have an insert or a delete.
@@ -49,6 +47,53 @@ def merge_join(left, right, left_key, right_key):
 It takes any two sorted iterables and key functions. The output encodes the operation through presence and absence: `(left, None)` is an insert - the row exists in the source but not the destination. `(None, right)` is a delete. `(left, right)` is a potential update - both rows are right there for field-by-field comparison. A full outer join on unique keys in a single pass.
 
 Ondrej Kokes [blogged about a Python implementation](https://kokes.github.io/blog/2018/11/25/merging-streams-python.html) that cleverly uses `heapq.merge()` and `itertools.groupby()`, but it is slightly slower in my tests and didn't save that many lines over the hand-written version above.
+
+## Using it for sync
+
+This is why I love this approach. Stream both sides row by row, sorted by the same key, and the sync logic practically writes itself - generators for your source and destination, and the sync function is left with a single loop that has clear insert/modify/delete conditions:
+
+```python
+def csv_row_generator(csv_path):
+    with open(csv_path) as f:
+        next(f)  # skip header
+        for line in f:
+            parts = line.rstrip("\n").split(",", 3)
+            yield (int(parts[0]), parts[1], parts[2], float(parts[3]))
+
+
+def db_row_generator(conn):
+    cursor = conn.execute(
+        "SELECT id, name, email, amount FROM records ORDER BY id"
+    )
+    yield from cursor
+
+
+def sync(conn, csv_path):
+    csv_stream = csv_row_generator(csv_path)
+    db_stream = db_row_generator(conn)
+
+    updated = deleted = inserted = 0
+
+    for csv_row, db_row in merge_join(
+        csv_stream, db_stream,
+        left_key=lambda row: row[0],
+        right_key=lambda row: row[0],
+    ):
+        if db_row is None:
+            # new record handling goes here
+            inserted += 1
+        elif csv_row is None:
+            # deleted record handling goes here
+            deleted += 1
+        else:
+            if csv_row[1:] != db_row[1:]:
+                # updated record handling goes here
+                updated += 1
+
+    return updated, deleted, inserted
+```
+
+At no point does either the full CSV or the full query result live in memory. One row from each side, compared, yielded, discarded. Memory usage is constant regardless of dataset size.
 
 ## Interactive example
 
@@ -326,53 +371,6 @@ Step through the algorithm on a small dataset — an 8-row CSV synced against a 
   render();
 })();
 </script>
-
-## Using it for sync
-
-This is why I love this approach. Stream both sides row by row, sorted by the same key, and the sync logic practically writes itself - generators for your source and destination, and the sync function is left with a single loop that has clear insert/modify/delete conditions:
-
-```python
-def csv_row_generator(csv_path):
-    with open(csv_path) as f:
-        next(f)  # skip header
-        for line in f:
-            parts = line.rstrip("\n").split(",", 3)
-            yield (int(parts[0]), parts[1], parts[2], float(parts[3]))
-
-
-def db_row_generator(conn):
-    cursor = conn.execute(
-        "SELECT id, name, email, amount FROM records ORDER BY id"
-    )
-    yield from cursor
-
-
-def sync(conn, csv_path):
-    csv_stream = csv_row_generator(csv_path)
-    db_stream = db_row_generator(conn)
-
-    updated = deleted = inserted = 0
-
-    for csv_row, db_row in merge_join(
-        csv_stream, db_stream,
-        left_key=lambda row: row[0],
-        right_key=lambda row: row[0],
-    ):
-        if db_row is None:
-            # new record handling goes here
-            inserted += 1
-        elif csv_row is None:
-            # deleted record handling goes here
-            deleted += 1
-        else:
-            if csv_row[1:] != db_row[1:]:
-                # updated record handling goes here
-                updated += 1
-
-    return updated, deleted, inserted
-```
-
-At no point does either the full CSV or the full query result live in memory. One row from each side, compared, yielded, discarded. Memory usage is constant regardless of dataset size.
 
 ## Why this works
 
