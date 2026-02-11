@@ -12,10 +12,6 @@ My early attempts would read the source data into a hash table and then compare 
 
 A merge join does the same comparison in 19 MB. Constant regardless of dataset size. In 25 lines of Python.
 
-The underlying idea, walking two sorted sequences in lockstep, is one of the oldest in computing. John von Neumann wrote a merge routine for the EDVAC in 1945, likely the first program ever designed for a stored-program computer. (Knuth tracked down the original manuscript and [analyzed it in 1970](https://dl.acm.org/doi/pdf/10.1145/356580.356581).) Thirty years later, Blasgen and Eswaran formalized the sort-merge join for IBM's System R, the prototype relational database that gave us SQL. Every major database engine still uses it.
-
-But there's no reason it has to stay inside the database.
-
 Any time both sides of a comparison are sorted by the same key, you can walk them in lockstep and produce a complete diff in a single pass. Data often has a natural order; just add an index on the destination to match it. No hash table, no temp table. An in-application merge join will do the trick.
 
 ## The algorithm
@@ -52,7 +48,11 @@ def merge_join(left, right, left_key, right_key):
 
 It takes any two sorted iterables and key functions. The output encodes the operation through presence and absence: `(left, None)` is an insert - the row exists in the source but not the destination. `(None, right)` is a delete. `(left, right)` is a potential update - both rows are right there for field-by-field comparison. A full outer join on unique keys in a single pass.
 
-Here's the algorithm stepping through a small example — syncing an 8-row CSV against a 7-row database table:
+Ondrej Kokes [blogged about a Python implementation](https://kokes.github.io/blog/2018/11/25/merging-streams-python.html) that cleverly uses `heapq.merge()` and `itertools.groupby()`, but it is slightly slower in my tests and didn't save that many lines over the hand-written version above.
+
+## Interactive example
+
+Step through the algorithm on a small dataset — an 8-row CSV synced against a 7-row database table:
 
 <style>
 #merge-join-viz {
@@ -147,64 +147,64 @@ Here's the algorithm stepping through a small example — syncing an 8-row CSV a
 <script>
 (function() {
   var csv = [
-    [1, 'Alice', '100.00'],
-    [2, 'Bob', '200.00'],
-    [4, 'Diana', '400.00'],
-    [5, 'Eve', '550.00'],
-    [6, 'Frank', '600.00'],
-    [7, 'Grace', '700.00'],
-    [9, 'Ivan', '900.00'],
-    [10, 'Judy', '1000.00']
+    [102, 'Alice', '100.00'],
+    [108, 'Bob', '200.00'],
+    [215, 'Diana', '400.00'],
+    [302, 'Eve', '550.00'],
+    [305, 'Frank', '600.00'],
+    [410, 'Grace', '700.00'],
+    [523, 'Ivan', '900.00'],
+    [601, 'Judy', '1000.00']
   ];
   var db = [
-    [1, 'Alice', '100.00'],
-    [2, 'Bob', '250.00'],
-    [3, 'Charlie', '300.00'],
-    [5, 'Eve', '500.00'],
-    [7, 'Grace', '700.00'],
-    [8, 'Heidi', '800.00'],
-    [10, 'Judy', '1000.00']
+    [102, 'Alice', '100.00'],
+    [108, 'Bob', '250.00'],
+    [112, 'Charlie', '300.00'],
+    [302, 'Eve', '500.00'],
+    [410, 'Grace', '700.00'],
+    [417, 'Heidi', '800.00'],
+    [601, 'Judy', '1000.00']
   ];
   var steps = [
     { c: 0, d: 0, type: 'match',
-      text: 'CSV key (1) = DB key (1). Keys match \u2014 fields identical.',
-      result: 'Match: id=1, Alice \u2014 no changes',
+      text: 'CSV key (102) = DB key (102). Keys match \u2014 fields identical.',
+      result: 'Match: id=102, Alice \u2014 no changes',
       cc: [], dc: [] },
     { c: 1, d: 1, type: 'update',
-      text: 'CSV key (2) = DB key (2). Keys match \u2014 amount differs (250 \u2192 200).',
-      result: 'Update: id=2, Bob (amount: 250 \u2192 200)',
+      text: 'CSV key (108) = DB key (108). Keys match \u2014 amount differs (250 \u2192 200).',
+      result: 'Update: id=108, Bob (amount: 250 \u2192 200)',
       cc: [[1, 'update']], dc: [] },
     { c: 2, d: 2, type: 'delete',
-      text: 'CSV key (4) > DB key (3). id=3 exists only in database \u2014 delete.',
-      result: 'Delete: id=3, Charlie',
+      text: 'CSV key (215) > DB key (112). id=112 exists only in database \u2014 delete.',
+      result: 'Delete: id=112, Charlie',
       cc: [], dc: [[2, 'delete']] },
     { c: 2, d: 3, type: 'insert',
-      text: 'CSV key (4) < DB key (5). id=4 exists only in CSV \u2014 insert.',
-      result: 'Insert: id=4, Diana',
+      text: 'CSV key (215) < DB key (302). id=215 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=215, Diana',
       cc: [[2, 'insert']], dc: [] },
     { c: 3, d: 3, type: 'update',
-      text: 'CSV key (5) = DB key (5). Keys match \u2014 amount differs (500 \u2192 550).',
-      result: 'Update: id=5, Eve (amount: 500 \u2192 550)',
+      text: 'CSV key (302) = DB key (302). Keys match \u2014 amount differs (500 \u2192 550).',
+      result: 'Update: id=302, Eve (amount: 500 \u2192 550)',
       cc: [[3, 'update']], dc: [] },
     { c: 4, d: 4, type: 'insert',
-      text: 'CSV key (6) < DB key (7). id=6 exists only in CSV \u2014 insert.',
-      result: 'Insert: id=6, Frank',
+      text: 'CSV key (305) < DB key (410). id=305 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=305, Frank',
       cc: [[4, 'insert']], dc: [] },
     { c: 5, d: 4, type: 'match',
-      text: 'CSV key (7) = DB key (7). Keys match \u2014 fields identical.',
-      result: 'Match: id=7, Grace \u2014 no changes',
+      text: 'CSV key (410) = DB key (410). Keys match \u2014 fields identical.',
+      result: 'Match: id=410, Grace \u2014 no changes',
       cc: [], dc: [] },
     { c: 6, d: 5, type: 'delete',
-      text: 'CSV key (9) > DB key (8). id=8 exists only in database \u2014 delete.',
-      result: 'Delete: id=8, Heidi',
+      text: 'CSV key (523) > DB key (417). id=417 exists only in database \u2014 delete.',
+      result: 'Delete: id=417, Heidi',
       cc: [], dc: [[5, 'delete']] },
     { c: 6, d: 6, type: 'insert',
-      text: 'CSV key (9) < DB key (10). id=9 exists only in CSV \u2014 insert.',
-      result: 'Insert: id=9, Ivan',
+      text: 'CSV key (523) < DB key (601). id=523 exists only in CSV \u2014 insert.',
+      result: 'Insert: id=523, Ivan',
       cc: [[6, 'insert']], dc: [] },
     { c: 7, d: 6, type: 'match',
-      text: 'CSV key (10) = DB key (10). Keys match \u2014 fields identical.',
-      result: 'Match: id=10, Judy \u2014 no changes',
+      text: 'CSV key (601) = DB key (601). Keys match \u2014 fields identical.',
+      result: 'Match: id=601, Judy \u2014 no changes',
       cc: [], dc: [] },
     { c: -1, d: -1, type: 'done',
       text: 'Both inputs exhausted. Sync complete: 3 inserts, 2 updates, 2 deletes.',
@@ -327,8 +327,6 @@ Here's the algorithm stepping through a small example — syncing an 8-row CSV a
 })();
 </script>
 
-Ondrej Kokes [blogged about a Python implementation](https://kokes.github.io/blog/2018/11/25/merging-streams-python.html) that cleverly uses `heapq.merge()` and `itertools.groupby()`, but it is slightly slower in my tests and didn't save that many lines over the hand-written version above.
-
 ## Using it for sync
 
 This is why I love this approach. Stream both sides row by row, sorted by the same key, and the sync logic practically writes itself - generators for your source and destination, and the sync function is left with a single loop that has clear insert/modify/delete conditions:
@@ -413,6 +411,10 @@ To preserve streaming behavior, you either need to do your own batched reads or 
 ## Benchmark caveats
 
 All benchmarks use SQLite (in-process). With PostgreSQL or MySQL, the index lookup strategy would be catastrophically worse due to network round trips per row.
+
+## A bit of history
+
+The underlying idea, walking two sorted sequences in lockstep, is one of the oldest in computing. John von Neumann wrote a merge routine for the EDVAC in 1945, likely the first program ever designed for a stored-program computer. (Knuth tracked down the original manuscript and [analyzed it in 1970](https://dl.acm.org/doi/pdf/10.1145/356580.356581).) Thirty years later, Blasgen and Eswaran formalized the sort-merge join for IBM's System R, the prototype relational database that gave us SQL. Every major database engine still uses it.
 
 ## Merge joins in the wild
 
