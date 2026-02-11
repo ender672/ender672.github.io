@@ -1,0 +1,54 @@
+---
+---
+
+@import "minima";
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a2e;
+    color: #ddd;
+  }
+  a { color: #6ea8fe; }
+  a:visited { color: #a78bfa; }
+  .site-header {
+    background-color: #1a1a2e;
+    border-bottom-color: #333;
+  }
+  .site-title, .site-title:visited { color: #ddd; }
+  .site-nav .page-link { color: #ddd; }
+  .post-title, .post-content h2, .post-content h3, .post-content h4 { color: #eee; }
+  .post-meta { color: #888; }
+  .site-footer { border-top-color: #333; color: #888; }
+  code, pre {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #ddd;
+  }
+  .highlight { background: #2d2d2d; }
+  .highlighter-rouge .highlight { background: #2d2d2d; }
+  .highlight .c, .highlight .cm, .highlight .c1, .highlight .cs { color: #6a737d; }
+  .highlight .k, .highlight .kc, .highlight .kd, .highlight .kp,
+  .highlight .kr, .highlight .kt { color: #ff7b72; }
+  .highlight .s, .highlight .sb, .highlight .sc, .highlight .sd,
+  .highlight .s2, .highlight .se, .highlight .sh, .highlight .si,
+  .highlight .sx, .highlight .s1, .highlight .ss { color: #a5d6ff; }
+  .highlight .m, .highlight .mf, .highlight .mh, .highlight .mi,
+  .highlight .mo { color: #79c0ff; }
+  .highlight .nf, .highlight .nx { color: #d2a8ff; }
+  .highlight .nc, .highlight .nn { color: #ffa657; }
+  .highlight .na { color: #79c0ff; }
+  .highlight .nb { color: #ffa657; }
+  .highlight .no, .highlight .nv, .highlight .ni { color: #ffa657; }
+  .highlight .ne, .highlight .nt { color: #7ee787; }
+  .highlight .o, .highlight .ow { color: #ff7b72; }
+  .highlight .cp { color: #79c0ff; }
+  .highlight .gd { color: #ffa198; background-color: rgba(248,81,73,.15); }
+  .highlight .gi { color: #7ee787; background-color: rgba(46,160,67,.15); }
+  .highlight .gh, .highlight .gu { color: #79c0ff; }
+  .highlight .go { color: #8b949e; }
+  .highlight .gp { color: #8b949e; }
+  .highlight .gr, .highlight .gt { color: #ffa198; }
+  .highlight .err { color: #ffa198; background-color: transparent; }
+  .highlight .w { color: #ddd; }
+  table th, table td { border-color: #444; }
+}

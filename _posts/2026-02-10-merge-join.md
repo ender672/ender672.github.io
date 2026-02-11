@@ -135,24 +135,7 @@ Here's the algorithm stepping through a small example — syncing an 8-row CSV a
 #merge-join-viz .mjv-result-insert { background: #dcfce7; }
 #merge-join-viz .mjv-result-update { background: #fef3c7; }
 @media (prefers-color-scheme: dark) {
-  #merge-join-viz { border-color: #444; }
-  #merge-join-viz button { background: #2d2d2d; border-color: #555; color: #ddd; }
-  #merge-join-viz button:hover:not(:disabled) { background: #3d3d3d; }
-  #merge-join-viz .mjv-label { color: #bbb; }
-  #merge-join-viz th { border-bottom-color: #555; color: #888; }
-  #merge-join-viz td { border-bottom-color: #333; }
-  #merge-join-viz tr.mjv-match { background: rgba(34,197,94,.15); }
-  #merge-join-viz tr.mjv-delete { background: rgba(239,68,68,.15); }
-  #merge-join-viz tr.mjv-insert { background: rgba(34,197,94,.15); }
-  #merge-join-viz tr.mjv-update { background: rgba(245,158,11,.15); }
-  #merge-join-viz tr.mjv-current { box-shadow: inset 3px 0 0 #818cf8; }
-  #merge-join-viz tr.mjv-current .mjv-ptr::after { border-left-color: #818cf8; }
-  #merge-join-viz .mjv-status { background: #2d2d2d; color: #ddd; }
-  #merge-join-viz .mjv-result-match { background: #fff; }
-  #merge-join-viz .mjv-result-delete { background: rgba(239,68,68,.15); }
-  #merge-join-viz .mjv-result-insert { background: rgba(34,197,94,.15); }
-  #merge-join-viz .mjv-result-update { background: rgba(245,158,11,.15); }
-  #merge-join-viz .mjv-counter { color: #777; }
+  #merge-join-viz { background: #fff; color: #000; }
 }
 @media (max-width: 500px) {
   #merge-join-viz .mjv-tables { flex-direction: column; gap: 12px; }
