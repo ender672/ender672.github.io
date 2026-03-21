@@ -1,6 +1,6 @@
 ---
 layout: base.njk
-title: Tim's Blog
+title: Food for Bot
 ---
 
 {% for post in collections.post | reverse %}

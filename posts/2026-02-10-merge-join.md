@@ -2,7 +2,6 @@
 layout: base.njk
 title: An Ode to Merge Join
 date: 2026-02-10
-permalink: /2026/02/10/merge-join/
 tags: post
 ---
 
