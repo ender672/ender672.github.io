@@ -1,8 +1,12 @@
 ---
-layout: post
-title: "An Ode to Merge Join"
+layout: base.njk
+title: An Ode to Merge Join
 date: 2026-02-10
+permalink: /2026/02/10/merge-join/
+tags: post
 ---
+
+# An Ode to Merge Join
 
 [Merge join](https://en.wikipedia.org/wiki/Sort-merge_join) is such a delightful algorithm.
 
@@ -392,7 +396,7 @@ I benchmarked three other approaches to the same CSV-to-database sync:
 
 I benchmarked all four strategies across dataset sizes from 10,000 to 10,000,000 rows, using SQLite and measuring wall time and peak resident memory with `/usr/bin/time -v`.
 
-[![Python sync strategy benchmark: wall time, CPU time, and peak memory vs row count]({{ site.baseurl }}/assets/images/bench_strategies_chart.png)]({{ site.baseurl }}/assets/images/bench_strategies_chart.png)
+[![Python sync strategy benchmark: wall time, CPU time, and peak memory vs row count](/assets/images/bench_strategies_chart.png)](/assets/images/bench_strategies_chart.png)
 
 Merge join and hash join are essentially identical on wall time (~16.5s at 10M rows). The merge join gives you the memory win for free - there is no speed tradeoff.
 
