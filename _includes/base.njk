@@ -4,6 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ title or "Food for Bot" }}</title>
+  {% if description %}<meta name="description" content="{{ description }}">{% endif %}
+  <meta property="og:title" content="{{ title or 'Food for Bot' }}">
+  {% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
+  <meta property="og:type" content="{% if tags and 'post' in tags %}article{% else %}website{% endif %}">
+  <meta property="og:url" content="https://ender672.github.io{{ page.url }}">
+  <meta property="og:site_name" content="Food for Bot">
+  <link rel="canonical" href="https://ender672.github.io{{ page.url }}">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/atom+xml" title="Food for Bot" href="/feed.xml">
   <style>
   * {
     margin: 0;
@@ -81,6 +90,13 @@
   <style>
     header {
       padding: 1.5em 0;
+    }
+
+    .post-date {
+      display: block;
+      color: #555;
+      font-size: 0.9em;
+      padding-top: 1.5em;
     }
 
     header a.site-title {

@@ -1,7 +1,16 @@
 import markdownIt from "markdown-it";
+import {
+  getNewestCollectionItemDate,
+  dateToRfc3339,
+} from "@11ty/eleventy-plugin-rss";
 
 export default function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets/images");
+  eleventyConfig.addPassthroughCopy("assets/favicon.svg");
+  eleventyConfig.addPassthroughCopy("robots.txt");
+
+  eleventyConfig.addFilter("getNewestCollectionItemDate", getNewestCollectionItemDate);
+  eleventyConfig.addFilter("dateToRfc3339", dateToRfc3339);
 
   const md = markdownIt({ html: true });
   const defaultRender = md.render.bind(md);

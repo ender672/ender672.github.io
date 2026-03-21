@@ -1,11 +1,14 @@
 ---
 layout: base.njk
 title: An Ode to Merge Join
+description: How the merge join algorithm syncs millions of rows in constant memory using two sorted inputs and 25 lines of Python.
 date: 2026-02-10
 tags: post
 ---
 
 # An Ode to Merge Join
+
+<time class="post-date">February 10, 2026</time>
 
 [Merge join](https://en.wikipedia.org/wiki/Sort-merge_join) is such a delightful algorithm.
 

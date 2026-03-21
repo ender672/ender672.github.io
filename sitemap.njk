@@ -1,0 +1,16 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.w3.org/2005/Sitemaps/schemas/sitemap/0.9">
+  <url>
+    <loc>https://ender672.github.io/</loc>
+  </url>
+  {%- for post in collections.post %}
+  <url>
+    <loc>https://ender672.github.io{{ post.url }}</loc>
+    <lastmod>{{ post.date | dateToRfc3339 }}</lastmod>
+  </url>
+  {%- endfor %}
+</urlset>
