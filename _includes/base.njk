@@ -4,10 +4,96 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ title or "Food for Bot" }}</title>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: rgb(211, 225, 246);
+    font-family: sans-serif;
+  }
+
+  .content-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  article.markdown {
+    line-height: 1.6em;
+    padding-top: 1.5em;
+
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    h1:first-child,
+    h2:first-child,
+    h3:first-child {
+      margin-top: 0;
+    }
+
+    p {
+      margin: 1em 0;
+    }
+
+    ul, ol {
+      padding-left: 1.5em;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    code {
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+      font-size: 0.9em;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: rgba(0, 0, 0, 0.06);
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+      line-height: 1.3em;
+
+      code {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        font-size: 0.85em;
+      }
+    }
+  }
+  </style>
 </head>
 <body>
+  <style>
+    header {
+      padding: 1.5em 0;
+    }
+
+    header a.site-title {
+      text-decoration: none;
+      color: black;
+      font-weight: 800;
+      font-size: 1.5em;
+    }
+  </style>
   <header>
-    <a href="/">Food for Bot</a>
+    <div class="content-wrap">
+      <a class="site-title" href="/">Food for Bot</a>
+    </div>
   </header>
   {{ content | safe }}
 </body>
