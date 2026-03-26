@@ -3,8 +3,10 @@ import {
   getNewestCollectionItemDate,
   dateToRfc3339,
 } from "@11ty/eleventy-plugin-rss";
+import syntaxHighlight from "@11ty/eleventy-plugin-syntaxhighlight";
 
 export default function(eleventyConfig) {
+  eleventyConfig.addPlugin(syntaxHighlight);
   eleventyConfig.addPassthroughCopy("assets/images");
   eleventyConfig.addPassthroughCopy("assets/favicon.svg");
   eleventyConfig.addPassthroughCopy("robots.txt");
