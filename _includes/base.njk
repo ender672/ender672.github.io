@@ -35,6 +35,7 @@
   article.markdown {
     line-height: 1.6em;
     padding-top: 1.5em;
+    padding-bottom: 3em;
 
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.5em;
@@ -135,5 +136,15 @@
     </div>
   </header>
   {{ content | safe }}
+  <script>
+    document.querySelectorAll('article.markdown img').forEach(img => {
+      if (img.parentElement.tagName === 'A') return;
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.target = '_blank';
+      img.parentElement.insertBefore(a, img);
+      a.appendChild(img);
+    });
+  </script>
 </body>
 </html>
