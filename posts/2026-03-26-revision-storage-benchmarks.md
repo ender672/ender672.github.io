@@ -26,6 +26,8 @@ My goal is to find the combination of revision storage strategy, delta encoding,
 2. **SnapshotDelta/Lz4Hc/Fossil** - Packs wikipedia data to 48MB, 0.09ms average read speed.
 3. **GroupedDelta/Zstd6/Fossil** - Packs the Yahoo data (1.7GB uncompressed) to 33MB, 0.20ms average read speed.
 
+(Live demo is purposely non-ssl (http://) so that old Yahoo! assets load.)
+
 [Live demo here](http://revisionbench.duckdns.org).
 
 [Live demo stats here](http://revisionbench.duckdns.org/stats).
@@ -606,6 +608,8 @@ The scatter plots were used to find the most interesting approaches, in my perso
 3. **GroupedDelta/Zstd6/Fossil** - This approach did extremely well at compressiong the Yahoo! data set with good read speed. It also did well on the other tests.
 
 # Live Demo
+(Live demo is purposely non-ssl (http://) so that old Yahoo! assets load.)
+
 [A live demo is here](http://revisionbench.duckdns.org)
 
 This is a bare server with no CDN or caching, serving each of the three data sets using three different approaches.
