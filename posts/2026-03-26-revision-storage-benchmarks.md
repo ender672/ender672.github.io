@@ -635,4 +635,4 @@ This benchmark should be fully reproducable, including the web application with 
 
 ## Side Notes
 
-During benchmarking, I encountered what appears to be a bug in the oxidelta crate that causes corruption.
+During benchmarking, I came across a bug in the oxidelta crate that causes corruption. [Fix PR: prevent silent data corruption from adjacent RUN coalescing](https://github.com/sockudo/oxidelta/pull/2)
