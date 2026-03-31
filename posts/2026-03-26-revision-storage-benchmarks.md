@@ -28,7 +28,7 @@ My goal is to find the combination of revision storage strategy, delta encoding,
 
 (Live demo is purposely non-ssl (http://) so that old Yahoo! assets load.)
 
-[Live demo here](http://revisionbench.duckdns.org).
+[Live demo here](http://revisionbench.duckdns.org/?dataset=yahoo.com&approach=SnapshotDelta_Lz4Hc_Fossil&revid=20010811082532).
 
 [Live demo stats here](http://revisionbench.duckdns.org/stats).
 
@@ -610,7 +610,7 @@ The scatter plots were used to find the most interesting approaches, in my perso
 # Live Demo
 (Live demo is purposely non-ssl (http://) so that old Yahoo! assets load.)
 
-[A live demo is here](http://revisionbench.duckdns.org)
+[A live demo is here](http://revisionbench.duckdns.org/?dataset=yahoo.com&approach=SnapshotDelta_Lz4Hc_Fossil&revid=20010811082532)
 
 This is a bare server with no CDN or caching, serving each of the three data sets using three different approaches.
 
