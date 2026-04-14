@@ -5,5 +5,5 @@ description: A technical blog.
 ---
 
 {% for post in collections.post | reverse %}
-- [{{ post.data.title }}]({{ post.url }})
+- <time datetime="{{ post.date | isoDate }}">{{ post.date | readableDate }}</time> — [{{ post.data.title }}]({{ post.url }})
 {% endfor %}

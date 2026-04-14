@@ -9,10 +9,15 @@ export default function(eleventyConfig) {
   eleventyConfig.addPlugin(syntaxHighlight);
   eleventyConfig.addPassthroughCopy("assets/images");
   eleventyConfig.addPassthroughCopy("assets/favicon.svg");
+  eleventyConfig.addPassthroughCopy("assets/prism-tomorrow.min.css");
   eleventyConfig.addPassthroughCopy("robots.txt");
 
   eleventyConfig.addFilter("getNewestCollectionItemDate", getNewestCollectionItemDate);
   eleventyConfig.addFilter("dateToRfc3339", dateToRfc3339);
+  eleventyConfig.addFilter("readableDate", date =>
+    date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
+  );
+  eleventyConfig.addFilter("isoDate", date => date.toISOString());
 
   const md = markdownIt({ html: true });
   const defaultRender = md.render.bind(md);

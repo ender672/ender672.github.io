@@ -9,6 +9,7 @@ eleventyExcludeFromCollections: true
   <link href="https://ender672.github.io/feed.xml" rel="self"/>
   <updated>{{ collections.post | getNewestCollectionItemDate | dateToRfc3339 }}</updated>
   <id>https://ender672.github.io/</id>
+  <author><name>Tim Elliott</name></author>
   {%- for post in collections.post | reverse %}
   <entry>
     <title>{{ post.data.title }}</title>
