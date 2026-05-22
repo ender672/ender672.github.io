@@ -135,6 +135,10 @@
     border-bottom-color: var(--link);
   }
 
+  article.markdown a:has(> img:only-child) {
+    border-bottom: none;
+  }
+
   article.markdown blockquote {
     border-left: 3px solid var(--border);
     padding: 0.25rem 0 0.25rem 1rem;
@@ -314,7 +318,6 @@
       if (img.parentElement.tagName === 'A') return;
       const a = document.createElement('a');
       a.href = img.src;
-      a.target = '_blank';
       img.parentElement.insertBefore(a, img);
       a.appendChild(img);
     });
