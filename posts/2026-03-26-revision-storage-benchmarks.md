@@ -8,7 +8,7 @@ tags: post
 
 # Packing Revisions Small and Reading them Fast
 
-<time class="post-date">March 20, 2026</time>
+<p class="post-meta"><time datetime="2026-03-20">March 20, 2026</time> · Tim Elliott</p>
 
 ![Yahoo! homepage circa 2001](/assets/images/yahoo-homepage-2001.png)
 

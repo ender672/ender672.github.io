@@ -15,122 +15,292 @@
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="alternate" type="application/atom+xml" title="Food for Bot" href="/feed.xml">
   <link rel="stylesheet" href="/assets/prism-tomorrow.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
   <style>
+  :root {
+    --bg: #ffffff;
+    --text: #111827;
+    --text-soft: #374151;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --border-soft: #f3f4f6;
+    --link: #4f46e5;
+    --link-hover: #3730a3;
+    --inline-code-bg: #f3f4f6;
+    --inline-code-text: #1f2937;
+    --code-bg: #1e1e2e;
+  }
+
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    background: rgb(211, 225, 246);
-    font-family: sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01", "calt";
+    text-rendering: optimizeLegibility;
   }
 
   .content-wrap {
-    max-width: 800px;
+    max-width: 720px;
     margin: 0 auto;
     width: 100%;
-    padding-left: 1.5em;
-    padding-right: 1.5em;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: none;
   }
 
   article.markdown {
-    line-height: 1.6em;
-    padding-top: 1.5em;
-    padding-bottom: 3em;
+    padding-top: 2rem;
+    padding-bottom: 4.5rem;
+  }
 
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.5em;
-      margin-bottom: 0.5em;
-    }
+  article.markdown h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-top: 0.5rem;
+  }
 
-    h1:first-child,
-    h2:first-child,
-    h3:first-child {
-      margin-top: 0;
-    }
+  article.markdown h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    margin-top: 2.75rem;
+    margin-bottom: 0.75rem;
+  }
 
-    p {
-      margin: 1em 0;
-    }
+  article.markdown h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
 
-    ul, ol {
-      padding-left: 1.5em;
-    }
+  article.markdown h4,
+  article.markdown h5,
+  article.markdown h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
 
-    img {
-      max-width: 100%;
-      height: auto;
-    }
+  article.markdown p {
+    margin: 1.1rem 0;
+    color: var(--text-soft);
+  }
 
-    code {
-      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
-      background: rgba(0, 0, 0, 0.06);
-      padding: 0.15em 0.35em;
-      border-radius: 4px;
-    }
+  article.markdown ul,
+  article.markdown ol {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+    color: var(--text-soft);
+  }
 
-    pre {
-      background: #2d2d2d;
-      padding: 1em;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 1em 0;
-      line-height: 1.6em;
+  article.markdown li {
+    margin: 0.35rem 0;
+  }
 
-      code {
-        background: none;
-        padding: 0;
-        border-radius: 0;
-        font-size: 0.95em;
-      }
-    }
+  article.markdown a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(79, 70, 229, 0.25);
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  article.markdown a:hover {
+    color: var(--link-hover);
+    border-bottom-color: var(--link);
+  }
+
+  article.markdown blockquote {
+    border-left: 3px solid var(--border);
+    padding: 0.25rem 0 0.25rem 1rem;
+    margin: 1.25rem 0;
+    color: var(--text-muted);
+  }
+
+  article.markdown img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  article.markdown hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  article.markdown code {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: var(--inline-code-bg);
+    color: var(--inline-code-text);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.875em;
+    font-feature-settings: "calt" 0;
+  }
+
+  article.markdown pre {
+    background: var(--code-bg);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+    font-size: 0.9rem;
+  }
+
+  article.markdown pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+
+  .post-meta {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.85rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .post-meta time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Legacy post-date class — kept for backwards compatibility. */
+  .post-date {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.85rem;
+    margin-bottom: 2.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-list li {
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .post-list li:last-child {
+    border-bottom: none;
+  }
+
+  .post-list a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: none;
+  }
+
+  .post-list .post-list-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    transition: color 0.15s ease;
+  }
+
+  .post-list a:hover .post-list-title {
+    color: var(--link);
+  }
+
+  .post-list time {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
   }
   </style>
 </head>
 <body>
   <style>
-    header {
-      padding: 1.5em 0;
+    .site-header {
+      border-bottom: 1px solid var(--border);
     }
 
-    .post-date {
-      display: block;
-      color: #555;
-      font-size: 0.9em;
-      padding-top: 1.5em;
-    }
-
-    header a.site-title {
-      text-decoration: none;
-      color: black;
-      font-weight: 800;
-      font-size: 1.5em;
-    }
-
-    header .content-wrap {
+    .site-header .content-wrap {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-top: 1.1rem;
+      padding-bottom: 1.1rem;
     }
 
-    header a.github-link {
-      color: #333;
+    .site-header a.site-title {
       text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
     }
 
-    header a.github-link:hover {
-      color: #000;
+    .site-header a.site-title:hover {
+      color: var(--link);
     }
 
-    header a.github-link svg {
-      width: 24px;
-      height: 24px;
-      vertical-align: middle;
+    .site-header a.github-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.15s ease;
+    }
+
+    .site-header a.github-link:hover {
+      color: var(--text);
+    }
+
+    .site-header a.github-link svg {
+      width: 20px;
+      height: 20px;
+      display: block;
     }
   </style>
-  <header>
+  <header class="site-header">
     <div class="content-wrap">
       <a class="site-title" href="/">Food for Bot</a>
       <a class="github-link" href="https://github.com/ender672" aria-label="GitHub">

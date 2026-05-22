@@ -8,7 +8,7 @@ tags: post
 
 # An Ode to Merge Join
 
-<time class="post-date">February 10, 2026</time>
+<p class="post-meta"><time datetime="2026-02-10">February 10, 2026</time> · Tim Elliott</p>
 
 [Merge join](https://en.wikipedia.org/wiki/Sort-merge_join) is such a delightful algorithm.
 
