@@ -5,7 +5,8 @@ description: A technical blog.
 ---
 
 <ul class="post-list">
-{% for post in collections.post | reverse %}
+{% assign posts = collections.post | reverse %}
+{% for post in posts %}
   <li>
     <a href="{{ post.url }}">
       <span class="post-list-title">{{ post.data.title }}</span>
