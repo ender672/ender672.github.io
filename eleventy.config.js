@@ -8,6 +8,7 @@ import syntaxHighlight from "@11ty/eleventy-plugin-syntaxhighlight";
 export default function(eleventyConfig) {
   eleventyConfig.addPlugin(syntaxHighlight);
   eleventyConfig.addPassthroughCopy("assets/images");
+  eleventyConfig.addPassthroughCopy("assets/videos");
   eleventyConfig.addPassthroughCopy("assets/favicon.svg");
   eleventyConfig.addPassthroughCopy("assets/prism-tomorrow.min.css");
   eleventyConfig.addPassthroughCopy("robots.txt");
