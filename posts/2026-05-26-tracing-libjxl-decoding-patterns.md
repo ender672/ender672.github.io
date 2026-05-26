@@ -18,11 +18,28 @@ In the clips below, each pixel lights up in its thread's color the moment that r
 
 **[cargo.jxl](https://jxl-trace-data.netlify.app/cargo.jxl):** 14,178 × 16,239, 230.24 Mpx, RGB, 14.16 MB · ≈16.7× slowdown
 
-<video src="/assets/videos/cargo_grid.mp4" controls autoplay muted loop playsinline></video>
+<video src="/assets/videos/cargo_grid.mp4" controls muted loop playsinline preload="metadata"></video>
 
 **[pineapple-alpha.jxl](https://jxl-trace-data.netlify.app/pineapple-alpha.jxl):** 2,560 × 1,600, 4.1 Mpx, RGBA, 1.56 MB · ≈222× slowdown
 
-<video src="/assets/videos/pineapple_grid.mp4" controls autoplay muted loop playsinline></video>
+<video src="/assets/videos/pineapple_grid.mp4" controls muted loop playsinline preload="metadata"></video>
+
+<script>
+(function() {
+  const videos = document.querySelectorAll('article.markdown video');
+  if (!videos.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        entry.target.play().catch(() => {});
+      } else {
+        entry.target.pause();
+      }
+    }
+  }, { threshold: 0.25 });
+  videos.forEach(v => io.observe(v));
+})();
+</script>
 
 A caveat on the timing: the wall-clock microseconds in each trace are measured from the first worker callback that delivered pixels. `0 ms` is when the first strip lands. libjxl's pre-callback setup and disk I/O are excluded.
 
