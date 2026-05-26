@@ -10,7 +10,7 @@ tags: post
 
 <p class="post-meta"><time datetime="2026-05-26">May 26, 2026</time> · Tim Elliott</p>
 
-I wanted to understand the order in which libjxl decodes an image. Which strips come first, which threads grab them, and how all of that shifts as you add cores. So I instrumented the decoder, recorded a timestamp for every region as it landed, and rendered the result as a video.
+I wanted to understand the order in which [libjxl](https://github.com/libjxl/libjxl) decodes an image. Which strips come first, which threads grab them, and how all of that shifts as you add cores. So I instrumented the decoder, recorded a timestamp for every region as it landed, and rendered the result as a video.
 
 The twist: the intermediate container that stores the trace data is itself a JPEG XL image with the same dimensions as the input, encoded losslessly as 8-bit RGBA. The red channel holds the thread ID, green, blue, and alpha together form a 24-bit microsecond timestamp.
 
